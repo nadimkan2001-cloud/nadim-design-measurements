@@ -233,7 +233,7 @@
           <button class="btn primary full" id="sharePdfButton" type="button">Поделиться / сохранить PDF</button>
           <button class="btn full" id="openPdfPrintButton" type="button" style="margin-top:8px">Дополнительно: открыть печать</button>
         </div>
-        <p class="lead" style="margin-top:10px;font-size:12px">Для PDF сначала подготовьте отчёт, затем откройте печать. Совместимость OBJ с БАЗИС-Мебельщик 22 необходимо проверить в программе.</p>
+        <p class="lead" style="margin-top:10px;font-size:12px">PDF формируется на устройстве и сохраняется через меню «Поделиться». Совместимость OBJ с БАЗИС-Мебельщик 22 необходимо проверить в программе.</p>
       </div>
     </section>
   </main>
@@ -250,6 +250,8 @@
       const fixtureNames={socket:"Розетка",switch:"Выключатель",light:"Светильник",water:"Вода",drain:"Слив"};
       const colors={door:"#3155d9",window:"#1098ad",socket:"#f08c00",switch:"#e8590c",light:"#fab005",water:"#20a37a",drain:"#1098ad",custom:"#7950f2"};
       let projects=readProjects(),projectId=null,wallIndex=0,wallCount=4,toastTimer=null,dragX=null,preparedPdf=null;
+      const appleMobile=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+      const standaloneIos=appleMobile&&(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches);
 
       function readProjects(){
         try { const data=JSON.parse(localStorage.getItem(STORE_KEY)||"[]");return Array.isArray(data)?data:[]; }
@@ -642,12 +644,13 @@
           }));
           preparedPdf=await createPdfFile(report,item);
         }catch(error){
-          console.error("Could not load wall photos for PDF",error);
+          console.error("Could not prepare PDF report",error);
           report.replaceChildren();toast(error.message||"Не удалось подготовить PDF. Попробуйте ещё раз.");
           prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";return;
         }
         if(current()?.id!==item.id||!report.children.length){prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";preparedPdf=null;return}
         prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";readyPanel.hidden=false;
+        if(standaloneIos)$("openPdfPrintButton").hidden=true;
         requestAnimationFrame(()=> $("sharePdfButton").scrollIntoView({block:"center"}));
         toast("PDF готов. Нажмите «Поделиться / сохранить PDF».");
       }
@@ -746,6 +749,7 @@
       $("pdfButton").addEventListener("click",exportPdf);
       $("sharePdfButton").addEventListener("click",sharePdf);
       $("openPdfPrintButton").addEventListener("click",openPdfPrintDialog);
+      if(standaloneIos)$("openPdfPrintButton").hidden=true;
       $("objButton").addEventListener("click",exportObj);
       $("downloadProjectButton").addEventListener("click",()=>{
         const item=current();if(item)download(JSON.stringify(item,null,2),`${item.name.replace(/[^\p{L}\p{N}-]+/gu,"-")||"zamер"}.json`,"application/json");
