@@ -223,12 +223,17 @@
       <div class="card">
         <h2>Экспорт и сохранение</h2>
         <div class="action-grid">
-          <button class="btn" id="pdfButton">PDF по стенам</button>
+          <button class="btn" id="pdfButton">Подготовить PDF</button>
           <button class="btn" id="objButton">3D OBJ</button>
           <button class="btn" id="downloadProjectButton">Скачать проект</button>
           <button class="btn" id="deleteProjectButton">Удалить замер</button>
         </div>
-        <p class="lead" style="margin-top:10px;font-size:12px">PDF откроет печать или меню сохранения. Совместимость OBJ с БАЗИС-Мебельщик 22 необходимо проверить в программе.</p>
+        <div class="info" id="pdfExportReady" hidden style="margin-top:10px">
+          <p style="margin:0 0 10px">Отчёт готов. Нажмите кнопку ниже, чтобы открыть системное окно печати.</p>
+          <p style="margin:0 0 10px">На iPhone в окне печати раздвиньте предпросмотр двумя пальцами, затем нажмите «Поделиться» → «Сохранить в Файлы».</p>
+          <button class="btn primary full" id="openPdfPrintButton" type="button">Открыть печать / сохранить PDF</button>
+        </div>
+        <p class="lead" style="margin-top:10px;font-size:12px">Для PDF сначала подготовьте отчёт, затем откройте печать. Совместимость OBJ с БАЗИС-Мебельщик 22 необходимо проверить в программе.</p>
       </div>
     </section>
   </main>
@@ -256,7 +261,13 @@
       }
       function current(){return projects.find(item=>item.id===projectId)}
       function activeWall(){return current()?.walls[wallIndex]}
+      function clearPdfExport(){
+        $("pdfExportReady").hidden=true;
+        $("pdfButton").disabled=false;$("pdfButton").textContent="Подготовить PDF";
+        $("printReport").replaceChildren();
+      }
       function showScreen(id){
+        if(id!=="measureScreen")clearPdfExport();
         document.querySelectorAll(".screen").forEach(screen=>screen.classList.toggle("active",screen.id===id));
         if(id==="measureScreen") requestAnimationFrame(drawPlan);
         window.scrollTo({top:0,behavior:"smooth"});
@@ -387,6 +398,7 @@
       function saveCurrent(){
         const item=current();if(!item)return;
         item.updatedAt=Date.now();persist();
+        clearPdfExport();
       }
       function compressWallPhoto(file){
         return new Promise((resolve,reject)=>{
@@ -534,11 +546,31 @@
       }
       async function exportPdf(){
         const item=current();if(!item){toast("Сначала создайте замер");return}
+        clearPdfExport();
         if(!validateWallInput())return;
-        $("printReport").innerHTML=item.walls.map((wall,index)=>createWallPage(item,wall,index)).join("");
+        const prepareButton=$("pdfButton"),readyPanel=$("pdfExportReady"),report=$("printReport");
+        prepareButton.disabled=true;prepareButton.textContent="Подготовка PDF…";readyPanel.hidden=true;report.replaceChildren();
+        report.innerHTML=item.walls.map((wall,index)=>createWallPage(item,wall,index)).join("");
         const photos=[...$("printReport").querySelectorAll("img")];
-        try{await Promise.all(photos.map(photo=>photo.decode()))}
-        catch(error){console.error("Could not load wall photos for PDF",error);toast("Не удалось подготовить фото для PDF");return}
+        try{
+          await Promise.all(photos.map(photo=>{
+            if(photo.complete)return photo.naturalWidth?Promise.resolve():Promise.reject(new Error("Фото стены не загрузилось"));
+            return new Promise((resolve,reject)=>{
+              photo.addEventListener("load",resolve,{once:true});
+              photo.addEventListener("error",()=>reject(new Error("Фото стены не загрузилось")),{once:true});
+            });
+          }));
+        }catch(error){
+          console.error("Could not load wall photos for PDF",error);
+          report.replaceChildren();toast("Не удалось подготовить фото для PDF. Проверьте фото стен и попробуйте ещё раз.");
+          prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";return;
+        }
+        if(current()?.id!==item.id||!report.children.length){prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";return}
+        prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";readyPanel.hidden=false;
+        toast("Отчёт готов. Нажмите «Открыть печать / сохранить PDF».");
+      }
+      function openPdfPrintDialog(){
+        if(!$("printReport").children.length){toast("Сначала подготовьте отчёт PDF");return}
         document.body.classList.add("printing");
         window.addEventListener("afterprint",()=>document.body.classList.remove("printing"),{once:true});
         window.print();
@@ -619,6 +651,7 @@
         item.name=name.trim();item.address=address.trim();saveCurrent();renderEditor();
       });
       $("pdfButton").addEventListener("click",exportPdf);
+      $("openPdfPrintButton").addEventListener("click",openPdfPrintDialog);
       $("objButton").addEventListener("click",exportObj);
       $("downloadProjectButton").addEventListener("click",()=>{
         const item=current();if(item)download(JSON.stringify(item,null,2),`${item.name.replace(/[^\p{L}\p{N}-]+/gu,"-")||"zamер"}.json`,"application/json");
