@@ -656,14 +656,17 @@
       }
       async function sharePdf(){
         if(!preparedPdf){toast("Сначала подготовьте отчёт PDF");return}
+        const downloadPdf=()=>{
+          const url=URL.createObjectURL(preparedPdf),link=document.createElement("a");
+          link.href=url;link.download=preparedPdf.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+          toast("PDF скачан. Откройте его через приложение «Файлы».");
+        };
         if(navigator.share&&navigator.canShare?.({files:[preparedPdf]})){
           try{await navigator.share({files:[preparedPdf],title:preparedPdf.name})}
-          catch(error){if(error.name!=="AbortError"){console.error("Could not share PDF",error);toast("Не удалось открыть меню отправки PDF")}}
+          catch(error){if(error.name!=="AbortError"){console.error("Could not share PDF",error);downloadPdf()}}
           return;
         }
-        const url=URL.createObjectURL(preparedPdf),link=document.createElement("a");
-        link.href=url;link.download=preparedPdf.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
-        toast("PDF скачан. Откройте его через приложение «Файлы».");
+        downloadPdf();
       }
       function openPdfPrintDialog(){
         if(!$("printReport").children.length){toast("Сначала подготовьте отчёт PDF");return}
