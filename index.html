@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#172554">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NADIM DESIGN">
+  <meta name="description" content="Мобильный помощник для замеров помещений NADIM DESIGN">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <title>NADIM DESIGN — замеры</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy:#172554; --blue:#3155d9; --ink:#202b3e; --muted:#758198;
+      --line:#e4e9f1; --bg:#f4f6fa; --white:#fff; --mint:#eaf8f1;
+      --danger:#c83b4b; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-size:15px}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:760px;margin:auto;min-height:100dvh;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom))}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+    .brand{display:flex;align-items:center;gap:11px}
+    .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:900;letter-spacing:-1px}
+    .brand-name{font-weight:900;letter-spacing:1.5px;font-size:15px;color:var(--navy)}
+    .brand-sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .top-actions{display:flex;gap:7px}
+    .screen{display:none}.screen.active{display:block}
+    .hero{padding:18px 0 20px}
+    h1{font-size:28px;line-height:1.12;letter-spacing:-.7px;margin:0 0 9px;color:var(--navy)}
+    .lead{margin:0;color:var(--muted);line-height:1.5;font-size:14px}
+    .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:12px;box-shadow:0 5px 20px rgba(32,43,62,.035)}
+    .card h2{margin:0 0 14px;font-size:17px;color:var(--navy)}
+    .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:12px 14px;font-weight:750}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.dark{background:var(--navy);border-color:var(--navy);color:white}
+    .btn.small{padding:9px 11px;font-size:13px}
+    .btn:disabled{opacity:.42;cursor:not-allowed}
+    .icon-button{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:12px;color:var(--navy);font-size:20px;font-weight:700}
+    .full{width:100%}
+    label{display:grid;gap:6px;color:#516078;font-size:12px;font-weight:750}
+    input,select,textarea{width:100%;min-width:0;border:1px solid #d8dfeb;border-radius:10px;padding:12px 11px;background:#fff;color:var(--ink);outline:none}
+    input:focus,select:focus,textarea:focus{border-color:#748ffc;box-shadow:0 0 0 3px #edf2ff}
+    .unit{position:relative}.unit input{padding-right:44px}.unit span{position:absolute;right:11px;top:14px;font-size:11px;color:#8a95a8}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .stack{display:grid;gap:12px}
+    .spacer{height:13px}
+    .project-list{display:grid;gap:9px}
+    .project-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .project-card strong{display:block;font-size:14px}.project-card small{display:block;color:var(--muted);margin-top:4px;font-size:12px}
+    .project-card .btn{flex:none}
+    .empty{text-align:center;color:var(--muted);padding:24px 12px;font-size:13px}
+    .offline-note,.info{background:#eef3ff;color:#425477;border-radius:11px;padding:12px;font-size:12px;line-height:1.5}
+    .offline-note{margin-top:12px}
+    .step-top{display:flex;align-items:center;gap:12px;margin:10px 0 17px}
+    .step-top h1{font-size:23px;margin:0}
+    .step-count{font-size:12px;color:var(--muted);margin-top:4px}
+    .progress{display:flex;gap:5px;margin:0 0 17px}
+    .progress span{height:5px;flex:1;background:#e5e9f1;border-radius:8px}
+    .progress span.done{background:#91a7ff}.progress span.active{background:var(--blue)}
+    .counter{display:flex;align-items:center;gap:12px}
+    .counter button{width:42px;height:42px;border-radius:11px;border:1px solid var(--line);background:#fff;font-size:23px;color:var(--navy)}
+    .counter output{min-width:88px;text-align:center;font-size:22px;font-weight:850;color:var(--navy)}
+    .counter small{font-size:13px;color:var(--muted)}
+    .wall-nav{display:flex;gap:7px;overflow:auto;padding:2px 0 8px}
+    .wall-chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;color:#59677e;font-weight:750}
+    .wall-chip.active{background:#edf2ff;border-color:#a5b4fc;color:#3155d9}
+    .angle-auto{font-size:11px;color:var(--muted);margin-top:6px}
+    .angle-note{font-size:12px;color:#485874;background:#f4f7fc;padding:10px 11px;border-radius:10px;line-height:1.5;margin:10px 0}
+    .wall-photo-preview{width:100%;max-height:240px;object-fit:contain;border-radius:10px;background:#f1f4f8;border:1px solid var(--line)}
+    .wall-photo-actions{display:flex;gap:8px;margin-top:8px}
+    .wall-comment{min-height:84px;resize:vertical}
+    .items{display:grid;gap:8px}
+    .item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:11px;padding:10px 11px}
+    .item strong{font-size:13px}.item small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.4}
+    .remove{width:34px;height:34px;flex:none;border:0;border-radius:9px;background:#fff0f1;color:var(--danger);font-size:20px}
+    .add-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfcfe}
+    .add-card h3{margin:0 0 10px;font-size:13px}
+    .step-buttons{display:flex;gap:9px;margin:14px 0}
+    .step-buttons .btn{flex:1}
+    .status{font-size:12px;padding:11px;border-radius:10px;line-height:1.45}
+    .status.good{background:#ebfbee;color:#2b7b3b}.status.warn{background:#fff8e6;color:#805f11}
+    .action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .preview{height:250px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(150deg,#f9fbff,#edf2f8);overflow:hidden}
+    .preview canvas{width:100%;height:100%;display:block}
+    .minor-actions{display:flex;gap:8px;align-items:center}
+    .minor-actions .btn{flex:1}
+    .toast{position:fixed;z-index:10;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:11px 15px;border-radius:11px;background:#202b3e;color:white;font-size:13px;box-shadow:0 6px 22px #0002;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100vw - 32px);text-align:center}
+    .toast.show{opacity:1}
+    .print-report{display:none}
+    @media(min-width:700px){.app{padding-left:24px;padding-right:24px}.preview{height:340px}.hero{padding-top:27px}}
+    @media print{
+      @page{size:A4 landscape;margin:8mm}
+      body.printing{background:white}
+      body.printing .app,body.printing .toast{display:none!important}
+      body.printing .print-report{display:block!important}
+      .print-wall{display:flex;flex-direction:column;height:194mm;box-sizing:border-box;overflow:hidden;break-after:page;page-break-after:always;break-inside:avoid;font-family:Arial,sans-serif;color:#182230}
+      .print-wall:last-child{break-after:auto;page-break-after:auto}
+      .print-wall h1{flex:none;font-size:20pt;line-height:1.1;margin:0 0 2mm}
+      .print-meta{flex:none;font-size:9pt;line-height:1.25;color:#536176;margin-bottom:3mm}
+      .print-wall svg{flex:none;width:100%;height:86mm;display:block;border:1px solid #cbd5e1}
+      .print-key,.print-list{flex:none;font-size:8pt;line-height:1.3;margin:2mm 0 0}
+      .print-list{columns:2;column-gap:8mm;padding-left:6mm;max-height:24mm;overflow:hidden}
+      .print-wall-extras{flex:none;height:40mm;display:grid;grid-template-columns:60mm 1fr;gap:5mm;align-items:start;margin-top:3mm}
+      .print-wall-photo{width:60mm;height:40mm;object-fit:contain;border:1px solid #cbd5e1}
+      .print-wall-comment{max-height:40mm;overflow:hidden;font-size:9pt;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere}
+      .print-wall-comment strong{display:block;margin-bottom:2mm}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">ND</div>
+        <div><div class="brand-name">NADIM DESIGN</div><div class="brand-sub">Замеры помещений</div></div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="homeButton" aria-label="На главную" title="На главную">⌂</button>
+      </div>
+    </header>
+
+    <section class="screen active" id="homeScreen">
+      <div class="hero"><h1>Ваши замеры</h1><p class="lead">Создайте замер, чтобы сохранить размеры комнаты, проёмы и расположение коммуникаций.</p></div>
+      <button class="btn primary full" id="newProjectButton">＋ Новый замер</button>
+      <div class="spacer"></div>
+      <div class="card">
+        <h2>Недавние объекты</h2>
+        <div class="project-list" id="projectList"></div>
+      </div>
+      <div class="offline-note">Замеры хранятся на этом устройстве и доступны без интернета. Сканирование помещения добавим отдельным этапом.</div>
+    </section>
+
+    <section class="screen" id="setupScreen">
+      <button class="btn small" data-go-home>← Назад</button>
+      <div class="hero"><h1>Новый замер</h1><p class="lead">Сначала запишите объект и задайте высоту комнаты.</p></div>
+      <div class="card stack">
+        <label>Название объекта<input id="projectName" maxlength="80" placeholder="Например, Кухня — ул. Лесная"></label>
+        <label>Адрес<input id="projectAddress" maxlength="160" placeholder="Город, улица, дом"></label>
+        <label>Общая высота комнаты<div class="unit"><input id="setupHeight" type="number" min="500" max="20000" step="10" value="2700"><span>мм</span></div></label>
+        <label>Количество стен
+          <div class="counter"><button type="button" id="countMinus" aria-label="Уменьшить количество стен">−</button><output id="wallCountOutput">4</output><small id="wallWord">стены</small><button type="button" id="countPlus" aria-label="Увеличить количество стен">＋</button></div>
+        </label>
+        <label>Толщина стен<div class="unit"><input id="setupThickness" type="number" min="50" max="5000" step="10" value="150"><span>мм</span></div></label>
+        <button class="btn primary full" id="createProjectButton">Перейти к замеру →</button>
+      </div>
+    </section>
+
+    <section class="screen" id="measureScreen">
+      <div class="minor-actions"><button class="btn small" id="backHomeButton">← Объекты</button><button class="btn small" id="editProjectInfo">Данные объекта</button></div>
+      <div class="hero"><h1 id="currentProjectTitle">Замер помещения</h1><p class="lead" id="currentProjectAddress"></p></div>
+      <div class="card">
+        <div class="progress" id="wallProgress"></div>
+        <div class="wall-nav" id="wallNavigation"></div>
+        <div class="step-top">
+          <div class="logo" id="wallLetter">A</div>
+          <div><h1 id="wallHeading">Стена A</h1><div class="step-count" id="wallStepCount"></div></div>
+        </div>
+        <div class="stack">
+          <label>Измеренная ширина стены<div class="unit"><input id="wallLengthInput" type="number" min="100" max="50000" step="1" inputmode="decimal"><span>мм</span></div></label>
+          <label>Направление стены<div class="unit"><input id="wallAngleInput" type="number" min="0" max="359.9" step="0.1" inputmode="decimal"><span>°</span></div></label>
+        </div>
+        <div class="angle-auto" id="angleHint"></div>
+        <div class="angle-note" id="closureNote"></div>
+
+        <div class="add-card" style="margin-top:12px">
+          <h3>Фото и комментарий к стене</h3>
+          <label>Добавить фото стены<input id="wallPhotoInput" type="file" accept="image/*" capture="environment"></label>
+          <div class="wall-photo-actions">
+            <button type="button" class="btn small" id="removeWallPhotoButton" hidden>Удалить фото</button>
+          </div>
+          <img id="wallPhotoPreview" class="wall-photo-preview" alt="Фото текущей стены" hidden style="margin-top:10px">
+          <label style="margin-top:10px">Комментарий<textarea id="wallCommentInput" class="wall-comment" maxlength="1000" placeholder="Например: угол стены неровный, проверить на монтаже"></textarea></label>
+          <div class="angle-auto">Фото и комментарий сохраняются отдельно для каждой стены и попадают в её лист PDF.</div>
+        </div>
+
+        <h2 style="margin:18px 0 10px;font-size:15px">Что находится на стене?</h2>
+        <div class="add-card">
+          <h3>Дверь или окно</h3>
+          <div class="grid2">
+            <label>Тип<select id="openingType"><option value="door">Дверь</option><option value="window">Окно</option></select></label>
+            <label>От левого края<div class="unit"><input id="openingOffset" type="number" min="0" step="1" value="500" inputmode="decimal"><span>мм</span></div></label>
+            <label>Ширина<div class="unit"><input id="openingWidth" type="number" min="1" step="1" value="900" inputmode="decimal"><span>мм</span></div></label>
+            <label>Высота<div class="unit"><input id="openingHeight" type="number" min="1" step="1" value="2100" inputmode="decimal"><span>мм</span></div></label>
+            <label class="sill-field" hidden>Высота подоконника<div class="unit"><input id="sillHeight" type="number" min="0" step="1" value="900" inputmode="decimal"><span>мм</span></div></label>
+          </div>
+          <div class="spacer"></div><button class="btn small full" id="addOpeningButton">＋ Добавить дверь</button>
+        </div>
+        <div class="add-card" style="margin-top:9px">
+          <h3>Электрика, сантехника или заметка</h3>
+          <div class="grid2">
+            <label>Тип<select id="fixtureType">
+              <option value="socket">Розетка</option><option value="switch">Выключатель</option>
+              <option value="light">Светильник</option><option value="water">Вода</option>
+              <option value="drain">Слив</option><option value="custom">Своя отметка</option>
+            </select></label>
+            <label>От левого края<div class="unit"><input id="fixtureOffset" type="number" min="0" step="1" value="1000" inputmode="decimal"><span>мм</span></div></label>
+            <label>Высота от пола<div class="unit"><input id="fixtureElevation" type="number" min="0" step="1" value="300" inputmode="decimal"><span>мм</span></div></label>
+            <label id="customLabelField" hidden>Название<input id="customLabel" maxlength="40" placeholder="Например, вентиляция"></label>
+          </div>
+          <div class="spacer"></div><button class="btn small full" id="addFixtureButton">＋ Добавить точку</button>
+        </div>
+        <div class="items" id="currentWallItems" style="margin-top:12px"></div>
+        <div class="step-buttons">
+          <button class="btn" id="previousWallButton">← Назад</button>
+          <button class="btn primary" id="nextWallButton">Следующая стена →</button>
+        </div>
+        <div class="wall-count-actions">
+          <button class="btn small" id="addWallButton">＋ Добавить стену</button>
+          <button class="btn small" id="removeWallButton">− Убрать последнюю</button>
+        </div>
+        <div id="closureStatus" class="status" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2>Схема помещения</h2>
+        <div class="preview"><canvas id="roomCanvas"></canvas></div>
+        <p class="lead" style="margin-top:10px;font-size:12px">Схема предварительная. Размеры каждого элемента смотрите в списке и PDF-развёртке стены.</p>
+      </div>
+      <div class="card">
+        <h2>Экспорт и сохранение</h2>
+        <div class="action-grid">
+          <button class="btn" id="pdfButton">PDF по стенам</button>
+          <button class="btn" id="objButton">3D OBJ</button>
+          <button class="btn" id="downloadProjectButton">Скачать проект</button>
+          <button class="btn" id="deleteProjectButton">Удалить замер</button>
+        </div>
+        <p class="lead" style="margin-top:10px;font-size:12px">PDF откроет печать или меню сохранения. Совместимость OBJ с БАЗИС-Мебельщик 22 необходимо проверить в программе.</p>
+      </div>
+    </section>
+  </main>
+  <div class="print-report" id="printReport"></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    (() => {
+      "use strict";
+      const $=id=>document.getElementById(id);
+      const STORE_KEY="nadim-design-room-projects-v1";
+      const letters=["A","B","C","D","E","F"];
+      const openingNames={door:"Дверь",window:"Окно"};
+      const fixtureNames={socket:"Розетка",switch:"Выключатель",light:"Светильник",water:"Вода",drain:"Слив"};
+      const colors={door:"#3155d9",window:"#1098ad",socket:"#f08c00",switch:"#e8590c",light:"#fab005",water:"#20a37a",drain:"#1098ad",custom:"#7950f2"};
+      let projects=readProjects(),projectId=null,wallIndex=0,wallCount=4,toastTimer=null,dragX=null;
+
+      function readProjects(){
+        try { const data=JSON.parse(localStorage.getItem(STORE_KEY)||"[]");return Array.isArray(data)?data:[]; }
+        catch(error){console.error("Could not read local project list",error);return[]}
+      }
+      function persist(){
+        try { localStorage.setItem(STORE_KEY,JSON.stringify(projects)); }
+        catch(error){toast("Не удалось сохранить на устройстве. Проверьте свободное место в браузере.");throw error;}
+      }
+      function current(){return projects.find(item=>item.id===projectId)}
+      function activeWall(){return current()?.walls[wallIndex]}
+      function showScreen(id){
+        document.querySelectorAll(".screen").forEach(screen=>screen.classList.toggle("active",screen.id===id));
+        if(id==="measureScreen") requestAnimationFrame(drawPlan);
+        window.scrollTo({top:0,behavior:"smooth"});
+      }
+      function toast(message){
+        const el=$("toast");el.textContent=message;el.classList.add("show");
+        clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2800);
+      }
+      function escapeHtml(text){
+        return String(text??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+      }
+      function wordWalls(n){return n===1?"стена":n<5?"стены":"стен"}
+      function updateWallCountControl(){
+        $("wallCountOutput").textContent=wallCount;$("wallWord").textContent=wordWalls(wallCount);
+        $("countMinus").disabled=wallCount<=1;$("countPlus").disabled=wallCount>=6;
+      }
+      function defaultsForCount(count){
+        if(count===4)return [0,90,180,270];
+        return Array.from({length:count},(_,i)=>i*360/count);
+      }
+      function createProject(){
+        const name=$("projectName").value.trim();
+        const address=$("projectAddress").value.trim();
+        const height=Number($("setupHeight").value),thickness=Number($("setupThickness").value);
+        if(!name){toast("Введите название объекта");$("projectName").focus();return}
+        if(!Number.isFinite(height)||height<500||height>20000||!Number.isFinite(thickness)||thickness<50||thickness>5000){
+          toast("Проверьте высоту комнаты и толщину стен");return;
+        }
+        const angles=defaultsForCount(wallCount);
+        const item={id:crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`,name,address,height,thickness,createdAt:Date.now(),updatedAt:Date.now(),
+          walls:Array.from({length:wallCount},(_,i)=>({id:letters[i],length:4000,angle:angles[i],angleAuto:true})),openings:[],fixtures:[]};
+        projects.unshift(item);projectId=item.id;wallIndex=0;persist();renderEditor();showScreen("measureScreen");
+      }
+      function renderHome(){
+        const list=$("projectList");
+        if(!projects.length){list.innerHTML='<div class="empty">Сохранённых замеров пока нет.<br>Создайте первый объект.</div>';return}
+        list.innerHTML=projects.slice().sort((a,b)=>b.updatedAt-a.updatedAt).map(item=>
+          `<article class="project-card"><div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.address||"Адрес не указан")} · ${item.walls.length} ${wordWalls(item.walls.length)} · ${new Date(item.updatedAt).toLocaleDateString("ru-RU")}</small></div><button class="btn small" data-open-project="${escapeHtml(item.id)}">Открыть</button></article>`).join("");
+      }
+      function setAutoAngles(item){
+        if(item.walls.length<3)return;
+        const defaults=defaultsForCount(item.walls.length);
+        item.walls.forEach((wall,index)=>{if(wall.angleAuto)wall.angle=defaults[index]});
+      }
+      function currentGeometry(item=current()){
+        if(!item||!item.walls.length)return {points:[],rawEnd:{x:0,y:0},adjustedEnd:{x:0,y:0},closingLength:0,correction:0,closed:false};
+        const points=[{x:0,y:0}];let heading=0;
+        item.walls.forEach((wall,index)=>{
+          const angle=Number(wall.angle)||0;
+          heading=angle*Math.PI/180;
+          const start=points[index];
+          points.push({x:start.x+wall.length*Math.cos(heading),y:start.y+wall.length*Math.sin(heading)});
+        });
+        const rawEnd=points[points.length-1],last=item.walls[item.walls.length-1];
+        const lastStart=points[points.length-2];
+        const closingLength=item.walls.length>=3?Math.hypot(lastStart.x,lastStart.y):last.length;
+        const closingAngle=item.walls.length>=3?(Math.atan2(-lastStart.y,-lastStart.x)*180/Math.PI+360)%360:last.angle;
+        const adjustedEnd=item.walls.length>=3?{x:0,y:0}:rawEnd;
+        const correction=item.walls.length>=3?closingLength-last.length:0;
+        const displayPoints=points.slice(0,-1).concat(adjustedEnd);
+        return {points:displayPoints,measuredPoints:points,rawEnd,adjustedEnd,closingLength,closingAngle,correction,closed:item.walls.length>=3};
+      }
+      function validateWallInput(){
+        const item=current(),wall=activeWall();
+        if(!item||!wall)return false;
+        const length=Number($("wallLengthInput").value),angle=Number($("wallAngleInput").value);
+        if(!Number.isFinite(length)||length<100||length>50000){toast("Ширина стены должна быть от 100 до 50 000 мм");return false}
+        if(wallIndex<item.walls.length-1&&(!Number.isFinite(angle)||angle<0||angle>=360)){toast("Угол стены должен быть от 0° до 359,9°");return false}
+        wall.length=length;
+        if(wallIndex<item.walls.length-1){wall.angle=angle;wall.angleAuto=false}
+        setAutoAngles(item);
+        item.updatedAt=Date.now();
+        return true;
+      }
+      function renderEditor(){
+        const item=current();if(!item)return;
+        $("currentProjectTitle").textContent=item.name;
+        $("currentProjectAddress").textContent=item.address||"Адрес не указан";
+        const wall=activeWall();
+        if(!wall){wallIndex=0;return}
+        $("wallLetter").textContent=wall.id;$("wallHeading").textContent=`Стена ${wall.id}`;
+        $("wallStepCount").textContent=`${wallIndex+1} из ${item.walls.length} · высота комнаты ${item.height} мм`;
+        $("wallLengthInput").value=wall.length;
+        $("wallLengthInput").readOnly=false;
+        $("wallCommentInput").value=wall.comment||"";
+        $("wallPhotoPreview").hidden=!wall.photo;
+        if(wall.photo)$("wallPhotoPreview").src=wall.photo;
+        else $("wallPhotoPreview").removeAttribute("src");
+        $("removeWallPhotoButton").hidden=!wall.photo;
+        $("wallPhotoInput").value="";
+        $("wallAngleInput").value=wallIndex===item.walls.length-1&&item.walls.length>=3?currentGeometry(item).closingAngle.toFixed(1):wall.angle;
+        $("wallAngleInput").readOnly=wallIndex===item.walls.length-1&&item.walls.length>=3;
+        $("angleHint").textContent=$("wallAngleInput").readOnly?"Направление последней стены рассчитано автоматически для замыкания контура.":"Угол задаётся относительно горизонтали; можно изменить вручную.";
+        const nav=$("wallNavigation");
+        nav.innerHTML=item.walls.map((entry,index)=>`<button class="wall-chip ${index===wallIndex?"active":""}" data-wall-index="${index}">${entry.id}</button>`).join("");
+        $("wallProgress").innerHTML=item.walls.map((_,index)=>`<span class="${index<wallIndex?"done":index===wallIndex?"active":""}"></span>`).join("");
+        $("previousWallButton").disabled=wallIndex===0;
+        $("nextWallButton").textContent=wallIndex===item.walls.length-1?"Готово ✓":"Следующая стена →";
+        $("addWallButton").disabled=item.walls.length>=6;
+        $("removeWallButton").disabled=item.walls.length<=1;
+        $("closureNote").textContent=wallIndex===item.walls.length-1&&item.walls.length>=3
+          ?`Последняя стена автоматически подстраивается для замыкания. Измерено: ${wall.length} мм · расчётная ширина контура: ${Math.round(currentGeometry(item).closingLength)} мм · поправка: ${currentGeometry(item).correction>0?"+":""}${Math.round(currentGeometry(item).correction)} мм.`
+          :"Сначала внесите ширину и направление стены, затем добавьте расположенные на ней элементы.";
+        renderWallItems();renderClosureStatus();drawPlan();
+      }
+      function renderWallItems(){
+        const wall=activeWall(),item=current();if(!wall||!item)return;
+        const entries=[
+          ...item.openings.map((value,index)=>({kind:"opening",value,index})),
+          ...item.fixtures.map((value,index)=>({kind:"fixture",value,index}))
+        ].filter(entry=>entry.value.wall===wall.id);
+        $("currentWallItems").innerHTML=entries.length?entries.map(entry=>{
+          const value=entry.value;
+          const title=entry.kind==="opening"?openingNames[value.type]:(value.type==="custom"?value.label:fixtureNames[value.type]);
+          const detail=entry.kind==="opening"
+            ?`от края ${value.offset} мм · ${value.width} × ${value.height} мм${value.type==="window"?` · подоконник ${value.sill} мм`:""}`
+            :`от края ${value.offset} мм · высота ${value.elevation} мм`;
+          return `<div class="item"><div><strong>${escapeHtml(title)}</strong><small>${detail}</small></div><button class="remove" data-remove-kind="${entry.kind}" data-index="${entry.index}" aria-label="Удалить ${escapeHtml(title)}">×</button></div>`;
+        }).join(""):'<div class="empty">Добавьте элементы, расположенные на этой стене.</div>';
+      }
+      function renderClosureStatus(){
+        const item=current();if(!item)return;
+        const geom=currentGeometry(item),status=$("closureStatus");
+        if(item.walls.length<3){status.className="status warn";status.textContent=`Добавлено ${item.walls.length} ${wordWalls(item.walls.length)}. Для замкнутой 3D-модели нужны минимум 3 стены.`;return}
+        status.className="status good";
+        status.textContent=`Контур замыкается автоматически. Поправка последней стены: ${geom.correction>0?"+":""}${Math.round(geom.correction)} мм. Измеренное значение сохраняется отдельно.`;
+      }
+      function saveCurrent(){
+        const item=current();if(!item)return;
+        item.updatedAt=Date.now();persist();
+      }
+      function compressWallPhoto(file){
+        return new Promise((resolve,reject)=>{
+          const image=new Image(),url=URL.createObjectURL(file);
+          image.onload=()=>{
+            URL.revokeObjectURL(url);
+            const maxSide=1280,ratio=Math.min(1,maxSide/Math.max(image.naturalWidth,image.naturalHeight));
+            const canvas=document.createElement("canvas");
+            canvas.width=Math.max(1,Math.round(image.naturalWidth*ratio));
+            canvas.height=Math.max(1,Math.round(image.naturalHeight*ratio));
+            const context=canvas.getContext("2d");
+            if(!context){reject(new Error("Не удалось подготовить изображение"));return}
+            context.drawImage(image,0,0,canvas.width,canvas.height);
+            let quality=.76,data=canvas.toDataURL("image/jpeg",quality);
+            while(data.length>260000&&quality>.42){quality-=.08;data=canvas.toDataURL("image/jpeg",quality)}
+            if(data.length>260000){reject(new Error("Фото слишком большое. Попробуйте уменьшить его перед загрузкой."));return}
+            resolve(data);
+          };
+          image.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Не удалось открыть выбранное фото"))};
+          image.src=url;
+        });
+      }
+      async function attachWallPhoto(file){
+        const wall=activeWall();if(!wall||!file)return;
+        if(!file.type.startsWith("image/")){toast("Выберите файл изображения");$("wallPhotoInput").value="";return}
+        try{
+          wall.photo=await compressWallPhoto(file);
+          saveCurrent();renderEditor();toast("Фото стены сохранено");
+        }catch(error){
+          console.error("Could not save wall photo",error);
+          toast(error.message||"Не удалось сохранить фото");
+          $("wallPhotoInput").value="";
+        }
+      }
+      function addOpening(){
+        if(!validateWallInput())return;
+        const item=current(),wall=activeWall(),type=$("openingType").value;
+        const value={wall:wall.id,type,offset:Number($("openingOffset").value),width:Number($("openingWidth").value),
+          height:Number($("openingHeight").value),sill:type==="window"?Number($("sillHeight").value):0};
+        if(![value.offset,value.width,value.height,value.sill].every(Number.isFinite)||value.offset<0||value.width<=0||
+          value.offset+value.width>wall.length||value.height<=0||
+          (type==="door"&&value.height>item.height)||(type==="window"&&(value.sill<0||value.sill+value.height>item.height))){
+          toast("Размеры проёма выходят за границы стены");return;
+        }
+        item.openings.push(value);saveCurrent();renderEditor();toast("Проём добавлен");
+      }
+      function addFixture(){
+        if(!validateWallInput())return;
+        const item=current(),wall=activeWall(),type=$("fixtureType").value;
+        const value={wall:wall.id,type,offset:Number($("fixtureOffset").value),elevation:Number($("fixtureElevation").value)};
+        if(type==="custom")value.label=$("customLabel").value.trim();
+        if(![value.offset,value.elevation].every(Number.isFinite)||value.offset<0||value.offset>wall.length||
+          value.elevation<0||value.elevation>item.height||(type==="custom"&&!value.label)){
+          toast(type==="custom"&&!value.label?"Введите название своей отметки":"Проверьте координаты точки");return;
+        }
+        item.fixtures.push(value);saveCurrent();renderEditor();toast("Точка добавлена");
+      }
+      function removeWall(){
+        const item=current();if(!item||item.walls.length<=1)return;
+        const wall=item.walls[item.walls.length-1];
+        const count=item.openings.filter(value=>value.wall===wall.id).length+item.fixtures.filter(value=>value.wall===wall.id).length;
+        if(count&&!confirm(`Удалить стену ${wall.id} и ${count} связанных элементов?`))return;
+        item.walls.pop();item.openings=item.openings.filter(value=>value.wall!==wall.id);item.fixtures=item.fixtures.filter(value=>value.wall!==wall.id);
+        setAutoAngles(item);wallIndex=Math.min(wallIndex,item.walls.length-1);saveCurrent();renderEditor();
+      }
+      function addWall(){
+        const item=current();if(!item||item.walls.length>=6)return;
+        if(!validateWallInput())return;
+        const index=item.walls.length;
+        const angle=(item.walls[index-1].angle+90)%360;
+        item.walls.push({id:letters[index],length:4000,angle,angleAuto:true});
+        setAutoAngles(item);wallIndex=index;saveCurrent();renderEditor();$("wallLengthInput").focus();
+      }
+      function makePlan(item){
+        const points=[{x:0,y:0}];
+        item.walls.forEach((wall,index)=>{
+          const start=points[index],angle=Number(wall.angle||0)*Math.PI/180;
+          points.push({x:start.x+wall.length*Math.cos(angle),y:start.y+wall.length*Math.sin(angle)});
+        });
+        if(item.walls.length>=3){
+          const start=points[points.length-2],last=points.length-1;
+          points[last]={x:0,y:0};
+        }
+        return points;
+      }
+      function drawPlan(){
+        const canvas=$("roomCanvas");if(!canvas)return;
+        const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+        const dpr=window.devicePixelRatio||1;canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
+        const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);
+        const item=current();if(!item){ctx.fillStyle="#778198";ctx.textAlign="center";ctx.font="14px Arial";ctx.fillText("План появится после создания замера",rect.width/2,rect.height/2);return}
+        const points=makePlan(item),viewAngle=item.viewAngle||0,c=Math.cos(viewAngle),s=Math.sin(viewAngle);
+        const rotated=points.map(p=>({x:p.x*c-p.y*s,y:p.x*s+p.y*c}));
+        const xs=rotated.map(p=>p.x),ys=rotated.map(p=>p.y);
+        const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+        const scale=Math.min((rect.width-78)/Math.max(1,maxX-minX),(rect.height-72)/Math.max(1,maxY-minY));
+        const map=p=>[39+(p.x-minX)*scale,rect.height-35-(p.y-minY)*scale];
+        if(item.walls.length>=3){ctx.beginPath();rotated.slice(0,item.walls.length).forEach((p,i)=>{const q=map(p);i?ctx.lineTo(...q):ctx.moveTo(...q)});ctx.closePath();ctx.fillStyle="#edf2fa";ctx.fill()}
+        rotated.slice(0,item.walls.length+1).forEach((p,i)=>{
+          if(i>=item.walls.length)return;
+          const a=map(p),b=map(rotated[i+1]),wall=item.walls[i];
+          ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.strokeStyle=i===wallIndex?"#3155d9":"#73819a";ctx.lineWidth=i===wallIndex?5:3;ctx.stroke();
+          const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+          const corrected=i===item.walls.length-1&&item.walls.length>=3;
+          const label=corrected?`${wall.id} · ${Math.round(wall.length)} (${Math.round(currentGeometry(item).closingLength)}) мм`:`${wall.id} · ${Math.round(wall.length)} мм`;
+          ctx.fillStyle="#263248";ctx.font="700 12px Arial";ctx.textAlign="center";ctx.fillText(label,mx,my-8);
+        });
+        ctx.textAlign="left";
+      }
+      function createWallPage(item,wall,index){
+        const openings=item.openings.filter(value=>value.wall===wall.id),fixtures=item.fixtures.filter(value=>value.wall===wall.id);
+        const geometry=currentGeometry(item),measuredWidth=wall.length;
+        const displayWidth=index===item.walls.length-1&&item.walls.length>=3?geometry.closingLength:measuredWidth;
+        const box={x:170,y:65,w:850,h:410},scale=Math.min(box.w/displayWidth,box.h/item.height);
+        const w=displayWidth*scale,h=item.height*scale,x=box.x+(box.w-w)/2,y=box.y+(box.h-h)/2,bottom=y+h;
+        const svg=[`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 590"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#f8fafc" stroke="#334155" stroke-width="3"/>`];
+        const list=[];
+        openings.forEach((value,i)=>{
+          const itemX=x+value.offset*scale,itemW=value.width*scale,sill=value.type==="door"?0:value.sill;
+          const itemH=value.height*scale,itemY=bottom-(sill+value.height)*scale,color=colors[value.type];
+          svg.push(`<rect x="${itemX}" y="${itemY}" width="${itemW}" height="${itemH}" fill="${value.type==="door"?"#e8edff":"#dff7fb"}" stroke="${color}" stroke-width="3"/>`);
+          svg.push(`<text x="${itemX+itemW/2}" y="${itemY+itemH/2}" text-anchor="middle" font-family="Arial" font-size="16" fill="#263248">${value.type==="door"?"Д":"О"}${i+1}</text>`);
+          svg.push(`<path d="M${itemX} ${bottom+13}v12m${itemW} -12v12m-${itemW} -5h${itemW}" stroke="${color}" fill="none"/>`);
+          svg.push(`<text x="${itemX+itemW/2}" y="${bottom+43}" text-anchor="middle" font-family="Arial" font-size="13" fill="${color}">x=${value.offset}, ширина=${value.width} мм</text>`);
+          svg.push(`<path d="M${x-12} ${bottom-sill*scale}h-12m12 -${itemH}h-12m5 ${itemH}v-${itemH}" stroke="${color}" fill="none"/>`);
+          svg.push(`<text x="${x-25}" y="${itemY+itemH/2}" text-anchor="end" font-family="Arial" font-size="12" fill="${color}">${value.height} мм</text>`);
+          list.push(`<li>${value.type==="door"?"Дверь":"Окно"} ${i+1}: от левого края ${value.offset} мм; ${value.width} × ${value.height} мм${value.type==="window"?`; подоконник ${value.sill} мм`:""}.</li>`);
+        });
+        fixtures.forEach((value,i)=>{
+          const px=x+value.offset*scale,py=bottom-value.elevation*scale,color=colors[value.type]||colors.custom;
+          svg.push(`<path d="M${x} ${py}H${px}M${px} ${bottom}V${py}" stroke="${color}" stroke-dasharray="5 4" fill="none"/>`);
+          svg.push(`<circle cx="${px}" cy="${py}" r="8" fill="white" stroke="${color}" stroke-width="4"/>`);
+          svg.push(`<text x="${px+12}" y="${py-8}" font-family="Arial" font-size="13" fill="${color}">${i+1}</text>`);
+          list.push(`<li>${escapeHtml(value.type==="custom"?value.label:fixtureNames[value.type])} ${i+1}: от левого края ${value.offset} мм; высота от пола ${value.elevation} мм.</li>`);
+        });
+        svg.push(`<path d="M${x} ${bottom+63}v12m${w} -12v12m-${w} -5h${w}" stroke="#334155" fill="none" stroke-width="2"/>`);
+        svg.push(`<text x="${x+w/2}" y="${bottom+97}" text-anchor="middle" font-family="Arial" font-size="15" font-weight="bold">Ширина стены ${Math.round(displayWidth)} мм</text>`);
+        svg.push(`<path d="M${x-55} ${bottom}h15m-15 -${h}h15m-8 ${h}v-${h}" stroke="#334155" fill="none" stroke-width="2"/>`);
+        svg.push(`<text x="${x-62}" y="${y+h/2}" text-anchor="end" font-family="Arial" font-size="14">Высота ${item.height} мм</text>`);
+        svg.push(`<text x="${x}" y="35" font-family="Arial" font-size="13" fill="#64748b">Вид из помещения · все размеры в миллиметрах</text></svg>`);
+        const correction=index===item.walls.length-1&&item.walls.length>=3?` · измерено ${measuredWidth} мм · расчётная ширина ${Math.round(displayWidth)} мм · поправка ${geometry.correction>0?"+":""}${Math.round(geometry.correction)} мм`:"";
+        const photo=wall.photo?`<img class="print-wall-photo" src="${escapeHtml(wall.photo)}" alt="Фото стены ${wall.id}">`:'<div class="print-wall-photo">Фото не добавлено</div>';
+        const comment=wall.comment?.trim()?escapeHtml(wall.comment.trim()):"Комментарий не указан";
+        return `<article class="print-wall"><h1>NADIM DESIGN · Стена ${wall.id}</h1><div class="print-meta">${escapeHtml(item.name)}${item.address?` · ${escapeHtml(item.address)}`:""} · ширина ${Math.round(displayWidth)} мм · высота ${item.height} мм${correction}</div>${svg.join("")}<div class="print-key">Д — дверь · О — окно · размерные выноски показывают отступ от левого края стены и высоту от пола</div><ol class="print-list">${list.length?list.join(""):"<li>Элементы на этой стене не указаны.</li>"}</ol><div class="print-wall-extras">${photo}<div class="print-wall-comment"><strong>Комментарий к стене ${wall.id}</strong>${comment}</div></div></article>`;
+      }
+      async function exportPdf(){
+        const item=current();if(!item){toast("Сначала создайте замер");return}
+        if(!validateWallInput())return;
+        $("printReport").innerHTML=item.walls.map((wall,index)=>createWallPage(item,wall,index)).join("");
+        const photos=[...$("printReport").querySelectorAll("img")];
+        try{await Promise.all(photos.map(photo=>photo.decode()))}
+        catch(error){console.error("Could not load wall photos for PDF",error);toast("Не удалось подготовить фото для PDF");return}
+        document.body.classList.add("printing");
+        window.addEventListener("afterprint",()=>document.body.classList.remove("printing"),{once:true});
+        window.print();
+      }
+      function download(data,filename,type){
+        const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement("a");
+        a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);
+      }
+      function exportObj(){
+        const item=current();if(!item){toast("Сначала создайте замер");return}
+        if(item.walls.length<3){toast("Для 3D-экспорта нужны минимум 3 стены");return}
+        if(!validateWallInput())return;
+        const geom=currentGeometry(item),lines=["# NADIM DESIGN room export","# units: metres"];
+        let next=1;
+        function face(name,vertices){
+          lines.push(`o ${name}`);vertices.forEach(v=>lines.push(`v ${(v.x/1000).toFixed(4)} ${(v.z/1000).toFixed(4)} ${(v.y/1000).toFixed(4)}`));
+          lines.push(`f ${vertices.map((_,i)=>next+i).join(" ")}`);next+=vertices.length;
+        }
+        for(let i=0;i<item.walls.length;i++){
+          const a=geom.points[i],b=geom.points[i+1],height=item.height;
+          face(`Wall_${item.walls[i].id}`,[{...a,z:0},{...b,z:0},{...b,z:height},{...a,z:height}]);
+        }
+        download(lines.join("\n"),"nadim-design-room.obj","text/plain");
+        toast("OBJ-файл подготовлен. Импорт проверьте в БАЗИС-Мебельщик.");
+      }
+      function openProject(id){
+        projectId=id;wallIndex=0;renderEditor();showScreen("measureScreen");
+      }
+
+      $("newProjectButton").addEventListener("click",()=>{wallCount=4;updateWallCountControl();$("projectName").value="";$("projectAddress").value="";showScreen("setupScreen")});
+      $("countMinus").addEventListener("click",()=>{wallCount=Math.max(1,wallCount-1);updateWallCountControl()});
+      $("countPlus").addEventListener("click",()=>{wallCount=Math.min(6,wallCount+1);updateWallCountControl()});
+      $("createProjectButton").addEventListener("click",createProject);
+      $("homeButton").addEventListener("click",()=>{renderHome();showScreen("homeScreen")});
+      $("backHomeButton").addEventListener("click",()=>{renderHome();showScreen("homeScreen")});
+      document.querySelectorAll("[data-go-home]").forEach(button=>button.addEventListener("click",()=>showScreen("homeScreen")));
+      $("projectList").addEventListener("click",event=>{const button=event.target.closest("[data-open-project]");if(button)openProject(button.dataset.openProject)});
+      $("wallNavigation").addEventListener("click",event=>{
+        const button=event.target.closest("[data-wall-index]");if(!button||!validateWallInput())return;
+        wallIndex=Number(button.dataset.wallIndex);saveCurrent();renderEditor();
+      });
+      $("wallLengthInput").addEventListener("change",()=>{if(validateWallInput()){saveCurrent();renderEditor()}});
+      $("wallAngleInput").addEventListener("change",()=>{if(validateWallInput()){saveCurrent();renderEditor()}});
+      $("wallPhotoInput").addEventListener("change",event=>attachWallPhoto(event.target.files?.[0]));
+      $("removeWallPhotoButton").addEventListener("click",()=>{
+        const wall=activeWall();if(!wall)return;
+        delete wall.photo;saveCurrent();renderEditor();toast("Фото удалено");
+      });
+      $("wallCommentInput").addEventListener("change",()=>{
+        const wall=activeWall();if(!wall)return;
+        wall.comment=$("wallCommentInput").value.trim();saveCurrent();
+      });
+      $("previousWallButton").addEventListener("click",()=>{if(!validateWallInput())return;wallIndex=Math.max(0,wallIndex-1);saveCurrent();renderEditor()});
+      $("nextWallButton").addEventListener("click",()=>{if(!validateWallInput())return;if(wallIndex<current().walls.length-1){wallIndex++;saveCurrent();renderEditor()}else{saveCurrent();toast("Замер сохранён на устройстве")}});
+      $("addWallButton").addEventListener("click",addWall);
+      $("removeWallButton").addEventListener("click",removeWall);
+      $("addOpeningButton").addEventListener("click",addOpening);
+      $("addFixtureButton").addEventListener("click",addFixture);
+      $("openingType").addEventListener("change",()=>{
+        const isWindow=$("openingType").value==="window";document.querySelector(".sill-field").hidden=!isWindow;
+        $("openingHeight").value=isWindow?1200:2100;$("addOpeningButton").textContent=isWindow?"＋ Добавить окно":"＋ Добавить дверь";
+      });
+      $("fixtureType").addEventListener("change",()=>{
+        $("customLabelField").hidden=$("fixtureType").value!=="custom";
+        $("fixtureHeight").value=$("fixtureType").value==="light"?Number(current()?.height||2700):300;
+      });
+      $("currentWallItems").addEventListener("click",event=>{
+        const button=event.target.closest("[data-remove-kind]");if(!button)return;
+        const item=current(),index=Number(button.dataset.index);
+        (button.dataset.removeKind==="opening"?item.openings:item.fixtures).splice(index,1);
+        saveCurrent();renderEditor();
+      });
+      $("editProjectInfo").addEventListener("click",()=>{
+        const item=current();if(!item)return;
+        const name=prompt("Название объекта",item.name);if(name===null)return;
+        const address=prompt("Адрес объекта",item.address||"");if(address===null)return;
+        if(!name.trim()){toast("Название объекта не может быть пустым");return}
+        item.name=name.trim();item.address=address.trim();saveCurrent();renderEditor();
+      });
+      $("pdfButton").addEventListener("click",exportPdf);
+      $("objButton").addEventListener("click",exportObj);
+      $("downloadProjectButton").addEventListener("click",()=>{
+        const item=current();if(item)download(JSON.stringify(item,null,2),`${item.name.replace(/[^\p{L}\p{N}-]+/gu,"-")||"zamер"}.json`,"application/json");
+      });
+      $("deleteProjectButton").addEventListener("click",()=>{
+        const item=current();if(!item||!confirm(`Удалить замер «${item.name}» с этого устройства?`))return;
+        projects=projects.filter(project=>project.id!==projectId);projectId=null;persist();renderHome();showScreen("homeScreen");
+      });
+      $("roomCanvas").addEventListener("pointerdown",event=>{dragX=event.clientX;$("roomCanvas").setPointerCapture(event.pointerId)});
+      $("roomCanvas").addEventListener("pointermove",event=>{
+        if(dragX===null||!current())return;const delta=event.clientX-dragX;dragX=event.clientX;
+        current().viewAngle=(current().viewAngle||0)+delta*.006;drawPlan();
+      });
+      $("roomCanvas").addEventListener("pointerup",()=>dragX=null);
+      window.addEventListener("resize",drawPlan);
+      renderHome();
+      if("serviceWorker" in navigator&&location.protocol!=="file:")navigator.serviceWorker.register("./service-worker.js").catch(error=>console.error("Offline support registration failed",error));
+    })();
+  </script>
+</body>
+</html>
