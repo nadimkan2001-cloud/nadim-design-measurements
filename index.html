@@ -202,6 +202,7 @@
             <label>Высота от пола<div class="unit"><input id="fixtureElevation" type="number" min="0" step="1" value="300" inputmode="decimal"><span>мм</span></div></label>
             <label id="customLabelField" hidden>Название<input id="customLabel" maxlength="40" placeholder="Например, вентиляция"></label>
           </div>
+          <div class="angle-auto">Для розеток и выключателей расстояние от левого края измеряется до центра.</div>
           <div class="spacer"></div><button class="btn small full" id="addFixtureButton">＋ Добавить точку</button>
         </div>
         <div class="items" id="currentWallItems" style="margin-top:12px"></div>
@@ -535,7 +536,8 @@
           svg.push(`<path d="M${x} ${py}H${px}M${px} ${bottom}V${py}" stroke="${color}" stroke-dasharray="5 4" fill="none"/>`);
           svg.push(`<circle cx="${px}" cy="${py}" r="8" fill="white" stroke="${color}" stroke-width="4"/>`);
           svg.push(`<text x="${px+12}" y="${py-8}" font-family="Arial" font-size="13" fill="${color}">${i+1}</text>`);
-          list.push(`<li>${escapeHtml(value.type==="custom"?value.label:fixtureNames[value.type])} ${i+1}: от левого края ${value.offset} мм; высота от пола ${value.elevation} мм.</li>`);
+          const centerNote=value.type==="socket"||value.type==="switch"?" до центра":"";
+          list.push(`<li>${escapeHtml(value.type==="custom"?value.label:fixtureNames[value.type])} ${i+1}: от левого края${centerNote} ${value.offset} мм; высота от пола ${value.elevation} мм.</li>`);
         });
         svg.push(`<path d="M${x} ${bottom+63}v12m${w} -12v12m-${w} -5h${w}" stroke="#334155" fill="none" stroke-width="2"/>`);
         svg.push(`<text x="${x+w/2}" y="${bottom+97}" text-anchor="middle" font-family="Arial" font-size="15" font-weight="bold">Ширина стены ${Math.round(displayWidth)} мм</text>`);
@@ -545,7 +547,7 @@
         const correction=index===item.walls.length-1&&item.walls.length>=3?` · измерено ${measuredWidth} мм · расчётная ширина ${Math.round(displayWidth)} мм · поправка ${geometry.correction>0?"+":""}${Math.round(geometry.correction)} мм`:"";
         const photo=wall.photo?`<img class="print-wall-photo" src="${escapeHtml(wall.photo)}" alt="Фото стены ${wall.id}">`:'<div class="print-wall-photo">Фото не добавлено</div>';
         const comment=wall.comment?.trim()?escapeHtml(wall.comment.trim()):"Комментарий не указан";
-        return `<article class="print-wall"><h1>NADIM DESIGN · Стена ${wall.id}</h1><div class="print-meta">${escapeHtml(item.name)}${item.address?` · ${escapeHtml(item.address)}`:""} · ширина ${Math.round(displayWidth)} мм · высота ${item.height} мм${correction}</div>${svg.join("")}<div class="print-key">Д — дверь · О — окно · размерные выноски показывают отступ от левого края стены и высоту от пола</div><ol class="print-list">${list.length?list.join(""):"<li>Элементы на этой стене не указаны.</li>"}</ol><div class="print-wall-extras">${photo}<div class="print-wall-comment"><strong>Комментарий к стене ${wall.id}</strong>${comment}</div></div></article>`;
+        return `<article class="print-wall"><h1>NADIM DESIGN · Стена ${wall.id}</h1><div class="print-meta">${escapeHtml(item.name)}${item.address?` · ${escapeHtml(item.address)}`:""} · ширина ${Math.round(displayWidth)} мм · высота ${item.height} мм${correction}</div>${svg.join("")}<div class="print-key">Д — дверь · О — окно · розетки и выключатели: размер до центра · размеры указаны от левого края стены и от пола</div><ol class="print-list">${list.length?list.join(""):"<li>Элементы на этой стене не указаны.</li>"}</ol><div class="print-wall-extras">${photo}<div class="print-wall-comment"><strong>Комментарий к стене ${wall.id}</strong>${comment}</div></div></article>`;
       }
       function loadImage(src){
         return new Promise((resolve,reject)=>{
