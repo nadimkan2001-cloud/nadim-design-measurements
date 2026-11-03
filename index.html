@@ -567,6 +567,7 @@
         }
         if(current()?.id!==item.id||!report.children.length){prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";return}
         prepareButton.disabled=false;prepareButton.textContent="Подготовить PDF";readyPanel.hidden=false;
+        requestAnimationFrame(()=> $("openPdfPrintButton").scrollIntoView({block:"center"}));
         toast("Отчёт готов. Нажмите «Открыть печать / сохранить PDF».");
       }
       function openPdfPrintDialog(){
