@@ -189,7 +189,7 @@
             <label class="sill-field" hidden>Высота подоконника<div class="unit"><input id="sillHeight" type="number" min="0" step="1" value="900" inputmode="decimal"><span>мм</span></div></label>
             <label class="radiator-elevation-field" hidden>Низ батареи от пола<div class="unit"><input id="radiatorElevation" type="number" min="0" step="1" value="100" inputmode="decimal"><span>мм</span></div></label>
           </div>
-          <div class="spacer"></div><button class="btn small full" id="addOpeningButton">＋ Добавить дверь</button>
+          <div class="spacer"></div><button class="btn small full" id="addOpeningButton">＋ Добавить</button>
         </div>
         <div class="add-card" style="margin-top:9px">
           <h3>Электрика, сантехника или заметка</h3>
@@ -742,7 +742,7 @@
         document.querySelector(".sill-field").hidden=!isWindow;
         document.querySelector(".radiator-elevation-field").hidden=!isRadiator;
         $("openingHeight").value=isWindow?1200:isRadiator?600:2100;
-        $("addOpeningButton").textContent=isWindow?"＋ Добавить окно":isRadiator?"＋ Добавить батарею":"＋ Добавить дверь";
+        $("addOpeningButton").textContent="＋ Добавить";
       });
       $("fixtureType").addEventListener("change",()=>{
         $("customLabelField").hidden=$("fixtureType").value!=="custom";
