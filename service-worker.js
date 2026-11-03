@@ -1,4 +1,4 @@
-const CACHE_NAME = "nadim-design-measurements-v3";
+const CACHE_NAME = "nadim-design-measurements-v4";
 const APP_FILES = [
   "./",
   "./index.html",

@@ -180,13 +180,14 @@
 
         <h2 style="margin:18px 0 10px;font-size:15px">Что находится на стене?</h2>
         <div class="add-card">
-          <h3>Дверь или окно</h3>
+          <h3>Дверь, окно или батарея</h3>
           <div class="grid2">
-            <label>Тип<select id="openingType"><option value="door">Дверь</option><option value="window">Окно</option></select></label>
+            <label>Тип<select id="openingType"><option value="door">Дверь</option><option value="window">Окно</option><option value="radiator">Батарея</option></select></label>
             <label>От левого края<div class="unit"><input id="openingOffset" type="number" min="0" step="1" value="500" inputmode="decimal"><span>мм</span></div></label>
             <label>Ширина<div class="unit"><input id="openingWidth" type="number" min="1" step="1" value="900" inputmode="decimal"><span>мм</span></div></label>
             <label>Высота<div class="unit"><input id="openingHeight" type="number" min="1" step="1" value="2100" inputmode="decimal"><span>мм</span></div></label>
             <label class="sill-field" hidden>Высота подоконника<div class="unit"><input id="sillHeight" type="number" min="0" step="1" value="900" inputmode="decimal"><span>мм</span></div></label>
+            <label class="radiator-elevation-field" hidden>Низ батареи от пола<div class="unit"><input id="radiatorElevation" type="number" min="0" step="1" value="100" inputmode="decimal"><span>мм</span></div></label>
           </div>
           <div class="spacer"></div><button class="btn small full" id="addOpeningButton">＋ Добавить дверь</button>
         </div>
@@ -247,9 +248,9 @@
       const $=id=>document.getElementById(id);
       const STORE_KEY="nadim-design-room-projects-v1";
       const letters=["A","B","C","D","E","F"];
-      const openingNames={door:"Дверь",window:"Окно"};
+      const openingNames={door:"Дверь",window:"Окно",radiator:"Батарея"};
       const fixtureNames={socket:"Розетка",switch:"Выключатель",light:"Светильник",water:"Вода",drain:"Слив"};
-      const colors={door:"#3155d9",window:"#1098ad",socket:"#f08c00",switch:"#e8590c",light:"#fab005",water:"#20a37a",drain:"#1098ad",custom:"#7950f2"};
+      const colors={door:"#3155d9",window:"#1098ad",radiator:"#e8590c",socket:"#f08c00",switch:"#e8590c",light:"#fab005",water:"#20a37a",drain:"#1098ad",custom:"#7950f2"};
       let projects=readProjects(),projectId=null,wallIndex=0,wallCount=4,toastTimer=null,dragX=null,preparedPdf=null;
       const appleMobile=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
       const standaloneIos=appleMobile&&(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches);
@@ -387,7 +388,7 @@
           const value=entry.value;
           const title=entry.kind==="opening"?openingNames[value.type]:(value.type==="custom"?value.label:fixtureNames[value.type]);
           const detail=entry.kind==="opening"
-            ?`от края ${value.offset} мм · ${value.width} × ${value.height} мм${value.type==="window"?` · подоконник ${value.sill} мм`:""}`
+            ?`от левого края ${value.offset} мм · ${value.width} × ${value.height} мм${value.type==="window"?` · подоконник ${value.sill} мм`:value.type==="radiator"?` · низ от пола ${value.elevation} мм`:""}`
             :`от края ${value.offset} мм · высота ${value.elevation} мм`;
           return `<div class="item"><div><strong>${escapeHtml(title)}</strong><small>${detail}</small></div><button class="remove" data-remove-kind="${entry.kind}" data-index="${entry.index}" aria-label="Удалить ${escapeHtml(title)}">×</button></div>`;
         }).join(""):'<div class="empty">Добавьте элементы, расположенные на этой стене.</div>';
@@ -440,14 +441,17 @@
       function addOpening(){
         if(!validateWallInput())return;
         const item=current(),wall=activeWall(),type=$("openingType").value;
+        const elevation=type==="radiator"?Number($("radiatorElevation").value):0;
         const value={wall:wall.id,type,offset:Number($("openingOffset").value),width:Number($("openingWidth").value),
           height:Number($("openingHeight").value),sill:type==="window"?Number($("sillHeight").value):0};
-        if(![value.offset,value.width,value.height,value.sill].every(Number.isFinite)||value.offset<0||value.width<=0||
+        if(type==="radiator")value.elevation=elevation;
+        if(![value.offset,value.width,value.height,value.sill,elevation].every(Number.isFinite)||value.offset<0||value.width<=0||
           value.offset+value.width>wall.length||value.height<=0||
-          (type==="door"&&value.height>item.height)||(type==="window"&&(value.sill<0||value.sill+value.height>item.height))){
-          toast("Размеры проёма выходят за границы стены");return;
+          (type==="door"&&value.height>item.height)||(type==="window"&&(value.sill<0||value.sill+value.height>item.height))||
+          (type==="radiator"&&(value.elevation<0||value.elevation+value.height>item.height))){
+          toast(type==="radiator"?"Батарея выходит за границы стены или комнаты":"Размеры проёма выходят за границы стены");return;
         }
-        item.openings.push(value);saveCurrent();renderEditor();toast("Проём добавлен");
+        item.openings.push(value);saveCurrent();renderEditor();toast(type==="radiator"?"Батарея добавлена":"Проём добавлен");
       }
       function addFixture(){
         if(!validateWallInput())return;
@@ -521,15 +525,18 @@
         const svg=[`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 590"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#f8fafc" stroke="#334155" stroke-width="3"/>`];
         const list=[];
         openings.forEach((value,i)=>{
-          const itemX=x+value.offset*scale,itemW=value.width*scale,sill=value.type==="door"?0:value.sill;
+          const itemX=x+value.offset*scale,itemW=value.width*scale;
+          const sill=value.type==="window"?value.sill:value.type==="radiator"?value.elevation:0;
           const itemH=value.height*scale,itemY=bottom-(sill+value.height)*scale,color=colors[value.type];
-          svg.push(`<rect x="${itemX}" y="${itemY}" width="${itemW}" height="${itemH}" fill="${value.type==="door"?"#e8edff":"#dff7fb"}" stroke="${color}" stroke-width="3"/>`);
-          svg.push(`<text x="${itemX+itemW/2}" y="${itemY+itemH/2}" text-anchor="middle" font-family="Arial" font-size="16" fill="#263248">${value.type==="door"?"Д":"О"}${i+1}</text>`);
+          const fill=value.type==="door"?"#e8edff":value.type==="window"?"#dff7fb":"#fff0e8";
+          const symbol=value.type==="door"?"Д":value.type==="window"?"О":"Б";
+          svg.push(`<rect x="${itemX}" y="${itemY}" width="${itemW}" height="${itemH}" fill="${fill}" stroke="${color}" stroke-width="3"/>`);
+          svg.push(`<text x="${itemX+itemW/2}" y="${itemY+itemH/2}" text-anchor="middle" font-family="Arial" font-size="16" fill="#263248">${symbol}${i+1}</text>`);
           svg.push(`<path d="M${itemX} ${bottom+13}v12m${itemW} -12v12m-${itemW} -5h${itemW}" stroke="${color}" fill="none"/>`);
           svg.push(`<text x="${itemX+itemW/2}" y="${bottom+43}" text-anchor="middle" font-family="Arial" font-size="13" fill="${color}">x=${value.offset}, ширина=${value.width} мм</text>`);
           svg.push(`<path d="M${x-12} ${bottom-sill*scale}h-12m12 -${itemH}h-12m5 ${itemH}v-${itemH}" stroke="${color}" fill="none"/>`);
           svg.push(`<text x="${x-25}" y="${itemY+itemH/2}" text-anchor="end" font-family="Arial" font-size="12" fill="${color}">${value.height} мм</text>`);
-          list.push(`<li>${value.type==="door"?"Дверь":"Окно"} ${i+1}: от левого края ${value.offset} мм; ${value.width} × ${value.height} мм${value.type==="window"?`; подоконник ${value.sill} мм`:""}.</li>`);
+          list.push(`<li>${value.type==="radiator"?`Батарея ${i+1}: от левого края ${value.offset} мм; ${value.width} × ${value.height} мм; низ на высоте ${value.elevation} мм от пола.`:`${value.type==="door"?"Дверь":"Окно"} ${i+1}: от левого края ${value.offset} мм; ${value.width} × ${value.height} мм${value.type==="window"?`; подоконник ${value.sill} мм`:""}.`}</li>`);
         });
         fixtures.forEach((value,i)=>{
           const px=x+value.offset*scale,py=bottom-value.elevation*scale,color=colors[value.type]||colors.custom;
@@ -547,7 +554,7 @@
         const correction=index===item.walls.length-1&&item.walls.length>=3?` · измерено ${measuredWidth} мм · расчётная ширина ${Math.round(displayWidth)} мм · поправка ${geometry.correction>0?"+":""}${Math.round(geometry.correction)} мм`:"";
         const photo=wall.photo?`<img class="print-wall-photo" src="${escapeHtml(wall.photo)}" alt="Фото стены ${wall.id}">`:'<div class="print-wall-photo">Фото не добавлено</div>';
         const comment=wall.comment?.trim()?escapeHtml(wall.comment.trim()):"Комментарий не указан";
-        return `<article class="print-wall"><h1>NADIM DESIGN · Стена ${wall.id}</h1><div class="print-meta">${escapeHtml(item.name)}${item.address?` · ${escapeHtml(item.address)}`:""} · ширина ${Math.round(displayWidth)} мм · высота ${item.height} мм${correction}</div>${svg.join("")}<div class="print-key">Д — дверь · О — окно · розетки и выключатели: размер до центра · размеры указаны от левого края стены и от пола</div><ol class="print-list">${list.length?list.join(""):"<li>Элементы на этой стене не указаны.</li>"}</ol><div class="print-wall-extras">${photo}<div class="print-wall-comment"><strong>Комментарий к стене ${wall.id}</strong>${comment}</div></div></article>`;
+        return `<article class="print-wall"><h1>NADIM DESIGN · Стена ${wall.id}</h1><div class="print-meta">${escapeHtml(item.name)}${item.address?` · ${escapeHtml(item.address)}`:""} · ширина ${Math.round(displayWidth)} мм · высота ${item.height} мм${correction}</div>${svg.join("")}<div class="print-key">Д — дверь · О — окно · Б — батарея · розетки и выключатели: размер до центра · размеры указаны от левого края стены и от пола</div><ol class="print-list">${list.length?list.join(""):"<li>Элементы на этой стене не указаны.</li>"}</ol><div class="print-wall-extras">${photo}<div class="print-wall-comment"><strong>Комментарий к стене ${wall.id}</strong>${comment}</div></div></article>`;
       }
       function loadImage(src){
         return new Promise((resolve,reject)=>{
@@ -731,8 +738,11 @@
       $("addOpeningButton").addEventListener("click",addOpening);
       $("addFixtureButton").addEventListener("click",addFixture);
       $("openingType").addEventListener("change",()=>{
-        const isWindow=$("openingType").value==="window";document.querySelector(".sill-field").hidden=!isWindow;
-        $("openingHeight").value=isWindow?1200:2100;$("addOpeningButton").textContent=isWindow?"＋ Добавить окно":"＋ Добавить дверь";
+        const type=$("openingType").value,isWindow=type==="window",isRadiator=type==="radiator";
+        document.querySelector(".sill-field").hidden=!isWindow;
+        document.querySelector(".radiator-elevation-field").hidden=!isRadiator;
+        $("openingHeight").value=isWindow?1200:isRadiator?600:2100;
+        $("addOpeningButton").textContent=isWindow?"＋ Добавить окно":isRadiator?"＋ Добавить батарею":"＋ Добавить дверь";
       });
       $("fixtureType").addEventListener("change",()=>{
         $("customLabelField").hidden=$("fixtureType").value!=="custom";
